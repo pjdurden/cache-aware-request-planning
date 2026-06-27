@@ -3,6 +3,11 @@ name = "ccrp"
 version = "0.1.0"
 description = "Cache-aware client-side request planning for black-box LLM APIs"
 requires-python = ">=3.10"
+license = {text = "MIT"}
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
 dependencies = []
 
 [project.optional-dependencies]

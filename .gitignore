@@ -3,6 +3,8 @@
 # cache-aware-request-planning project paths.
 /*
 !/.gitignore
+!/README.md
+!/LICENSE
 !/ccrp/
 !/tests/
 !/pyproject.toml
