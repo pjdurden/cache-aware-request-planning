@@ -142,7 +142,9 @@ At the agentic operating point (service time 100 seconds) we place shaping besid
 | semantic_cache | 117.15 | 0.032 | 0.10 |
 | naive | 206.40 | 0.000 | 0.00 |
 
-In this regime shaping Pareto-dominates: it has the lowest server cost and the only intervention with zero local compute and zero quality cost. Compression and semantic caching both beat the naive order, but each pays a quality and a local-compute price and still costs more than shaping. This is the thesis made concrete: where the cacheable prefix fraction is high, the lossless and free intervention is also the cheapest, and the lossy ones are a fallback for the regimes where shaping cannot help. Figure 1 (`pareto_plane.png`) plots these points.
+In this regime shaping Pareto-dominates: it has the lowest server cost and the only intervention with zero local compute and zero quality cost. Compression and semantic caching both beat the naive order, but each pays a quality and a local-compute price and still costs more than shaping. This is the thesis made concrete: where the cacheable prefix fraction is high, the lossless and free intervention is also the cheapest, and the lossy ones are a fallback for the regimes where shaping cannot help. Figure 1 plots these points.
+
+![Figure 1: The comparison plane at the agentic operating point. Cache shaping sits at the lowest server cost with zero local compute (smallest marker) and zero quality cost, dominating prompt compression and semantic caching.](pareto_plane.png)
 
 ## 7. Related Work
 
