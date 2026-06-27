@@ -1,0 +1,18 @@
+# This git repo is rooted at $HOME. To avoid tracking unrelated home files,
+# ignore everything by default and whitelist only the
+# cache-aware-request-planning project paths.
+/*
+!/.gitignore
+!/ccrp/
+!/tests/
+!/pyproject.toml
+!/docs/
+
+# Within whitelisted dirs, still ignore generated artifacts.
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+build/
+.venv/
+.superpowers/
