@@ -30,7 +30,7 @@ Contributions:
 
 ### 2.1 The consumer's view
 
-We model a single tenant calling one provider. Each request carries a prefix (the stable part: system prompt, tool schemas, few-shot examples, large documents) and a suffix (the variable part: the user turn). The provider may cache a prefix so that a later request sharing that exact prefix pays a discounted rate on the cached portion. The consumer cannot build or inspect this cache directly. The consumer can, however, observe its effect: modern APIs report the number of cached input tokens in the usage payload of each response.
+We model a single tenant calling one provider. Each request carries a prefix (the stable part: system prompt, tool schemas, few-shot examples, large documents) and a suffix (the variable part: the user turn). The provider may cache a prefix so that a later request sharing that exact prefix pays a discounted rate on the cached portion. The consumer cannot build or inspect this cache directly. The consumer can, however, observe its effect: modern APIs report the number of cached input tokens in the usage payload of each response [7, 8].
 
 ### 2.2 Cost model
 
@@ -62,10 +62,10 @@ We enumerate the moves available to a black-box API consumer and label each. The
 | Output constrained decoding | Server-side | Decoding happens on the provider |
 | Prompt or context compression | Legal, lossy, local cost | A baseline (Section 6) |
 | Semantic caching of responses | Legal, skips calls on a hit | A baseline (Section 6) |
-| Model cascade (FrugalGPT) | Legal, routing across models | One cell of this taxonomy |
+| Model cascade (FrugalGPT [1]) | Legal, routing across models | One cell of this taxonomy |
 | Cache-aware request shaping | Legal, lossless, free | The centerpiece (Section 4) |
 
-The distinction from the server-side literature is sharp. Systems such as PagedAttention in vLLM, RadixAttention in SGLang, and Mooncake make prefix reuse cheap by managing the key-value cache on hardware the operator controls. The black-box consumer has none of that control. The consumer's only lever on the provider's cache is the content and timing of the requests it sends, which is exactly what shaping manipulates.
+The distinction from the server-side literature is sharp. Systems such as PagedAttention in vLLM [2], RadixAttention in SGLang [3], and Mooncake [4] make prefix reuse cheap by managing the key-value cache on hardware the operator controls. The black-box consumer has none of that control. The consumer's only lever on the provider's cache is the content and timing of the requests it sends, which is exactly what shaping manipulates.
 
 ## 4. Cache-Aware Request Shaping
 
@@ -77,7 +77,7 @@ Two layout rules are necessary for any cache hit at all. First, place invariant 
 
 ### 4.2 The scheduling problem
 
-Provider caches expire after a short time-to-live (on the order of minutes). Given a stream of requests with shared prefixes, the consumer can often choose the order and timing of dispatch within a latency-slack budget. Two same-prefix requests that the naive arrival order separates by more than the time-to-live each pay a cache write; the same two, scheduled back to back, pay one write and one read. This is the client-side analogue of what RadixAttention does inside the server, except the consumer is optimizing against a cache it cannot see and does not own.
+Provider caches expire after a short time-to-live (on the order of minutes). Given a stream of requests with shared prefixes, the consumer can often choose the order and timing of dispatch within a latency-slack budget. Two same-prefix requests that the naive arrival order separates by more than the time-to-live each pay a cache write; the same two, scheduled back to back, pay one write and one read. This is the client-side analogue of what RadixAttention [3] does inside the server, except the consumer is optimizing against a cache it cannot see and does not own.
 
 ### 4.3 A greedy scheduler
 
@@ -146,7 +146,7 @@ In this regime shaping Pareto-dominates: it has the lowest server cost and the o
 
 ## 7. Related Work
 
-FrugalGPT reduces cost for API consumers by cascading from cheap to expensive models. It is the closest prior work and occupies one cell of our taxonomy (model routing); it does not formalize the broader client-side space or the cache-alignment move. Prompt and context compression (LLMLingua and its variants) reduces input tokens by dropping low-information content; it is one of our baselines and is lossy. Semantic response caching (for example GPTCache) skips calls on a near-duplicate query; it is our other baseline and depends on a hit. Server-side prefix reuse (PagedAttention in vLLM, RadixAttention in SGLang, Mooncake) achieves the same economic effect as shaping but requires owning the serving stack; our contribution is to obtain a share of that benefit from the outside, against an opaque provider cache. Provider prompt caching itself (introduced across major APIs in 2024) is the mechanism we exploit; to our knowledge the client-side problem of scheduling against it has not been studied.
+FrugalGPT [1] reduces cost for API consumers by cascading from cheap to expensive models. It is the closest prior work and occupies one cell of our taxonomy (model routing); it does not formalize the broader client-side space or the cache-alignment move. Prompt and context compression (LLMLingua [5] and its variants) reduces input tokens by dropping low-information content; it is one of our baselines and is lossy. Semantic response caching (for example GPTCache [6]) skips calls on a near-duplicate query; it is our other baseline and depends on a hit. Server-side prefix reuse (PagedAttention in vLLM [2], RadixAttention in SGLang [3], Mooncake [4]) achieves the same economic effect as shaping but requires owning the serving stack; our contribution is to obtain a share of that benefit from the outside, against an opaque provider cache. Provider prompt caching itself (introduced across major APIs in 2024 [7, 8, 9]) is the mechanism we exploit; to our knowledge the client-side problem of scheduling against it has not been studied.
 
 ## 8. Limitations
 
@@ -155,3 +155,23 @@ The provider cache is opaque and may change between characterization and deploym
 ## 9. Conclusion
 
 For a consumer of a black-box, per-token LLM API, the bill is set by tokens the server processes, and the only honest way to lower it is to send fewer billable tokens or calls at fixed quality. Within that constraint, aligning requests to the provider's prompt cache is the rare intervention that costs nothing and loses nothing, and a trivial greedy scheduler captures most of its benefit in the regime where it applies. We have framed that regime, built the planner, and shown both where it wins and where the consumer must fall back to lossy compression or caching. The framing and the artifact are meant to be reused: the cost model and the taxonomy outlive any single provider's pricing, and the characterization harness adapts as those prices move.
+
+## References
+
+[1] Lingjiao Chen, Matei Zaharia, and James Zou. FrugalGPT: How to Use Large Language Models While Reducing Cost and Improving Performance. Transactions on Machine Learning Research (TMLR), 2024. arXiv:2305.05176.
+
+[2] Woosuk Kwon, Zhuohan Li, Siyuan Zhuang, Ying Sheng, Lianmin Zheng, Cody Hao Yu, Joseph E. Gonzalez, Hao Zhang, and Ion Stoica. Efficient Memory Management for Large Language Model Serving with PagedAttention. In Proceedings of the 29th ACM Symposium on Operating Systems Principles (SOSP), 2023. arXiv:2309.06180.
+
+[3] Lianmin Zheng, Liangsheng Yin, Zhiqiang Xie, Chuyue Sun, Jeff Huang, Cody Hao Yu, Shiyi Cao, Christos Kozyrakis, Ion Stoica, Joseph E. Gonzalez, Clark Barrett, and Ying Sheng. SGLang: Efficient Execution of Structured Language Model Programs. In Advances in Neural Information Processing Systems (NeurIPS), 2024. arXiv:2312.07104.
+
+[4] Ruoyu Qin, Zheming Li, Weiran He, Mingxing Zhang, Yongwei Wu, Weimin Zheng, and Xinran Xu. Mooncake: A KVCache-centric Disaggregated Architecture for LLM Serving. In Proceedings of the 23rd USENIX Conference on File and Storage Technologies (FAST), 2025. Best Paper Award. arXiv:2407.00079.
+
+[5] Huiqiang Jiang, Qianhui Wu, Chin-Yew Lin, Yuqing Yang, and Lili Qiu. LLMLingua: Compressing Prompts for Accelerated Inference of Large Language Models. In Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing (EMNLP), pages 13358-13376, 2023. arXiv:2310.05736.
+
+[6] Fu Bang. GPTCache: An Open-Source Semantic Cache for LLM Applications Enabling Faster Answers and Cost Savings. In Proceedings of the 3rd Workshop for Natural Language Processing Open Source Software (NLP-OSS), pages 212-218, 2023.
+
+[7] Anthropic. Prompt Caching. Anthropic API technical documentation, 2024.
+
+[8] OpenAI. Prompt Caching. OpenAI API technical documentation, 2024.
+
+[9] Google. Context Caching. Gemini API technical documentation, 2024.
