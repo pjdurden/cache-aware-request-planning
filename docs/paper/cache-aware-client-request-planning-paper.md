@@ -1,6 +1,6 @@
 # Cache-Aware Client-Side Request Planning for Black-Box LLM APIs
 
-**Draft, 2026-06-28. Target: systems-for-ML workshop (arXiv preprint first).**
+<p style="text-align:center; margin:0 0 10pt 0;">Prajjwal Chittori<br>Independent Researcher<br>prajjwalchittoriwork@gmail.com<br>ORCID: <a href="https://orcid.org/0009-0000-7410-8290">0009-0000-7410-8290</a><br>July 2026</p>
 
 ## Abstract
 

@@ -1,8 +1,10 @@
 # Cache-Aware Client-Side Request Planning for Black-Box LLM APIs
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21386594.svg)](https://doi.org/10.5281/zenodo.21386594)
+
 Lossless billed-cost reduction for applications that call a paid, per-token LLM API, by aligning requests to the provider's prompt cache. No model ownership, no quality loss, no extra local compute.
 
-Research artifact plus a paper draft. 34 tests passing.
+Research artifact plus a paper draft (Zenodo preprint, [DOI 10.5281/zenodo.21386594](https://doi.org/10.5281/zenodo.21386594)). 34 tests passing.
 
 ## The idea in one paragraph
 
@@ -82,3 +84,18 @@ The package is tokenizer-agnostic: it works in token counts, so the simulator an
 ## Status and caveats
 
 This is a draft with an honest scope. The results are simulation under representative cache parameters, not an end-to-end live-API study. The `characterize` module exists to recover real parameters from provider telemetry, which is the calibration step that would turn these numbers into measured ones. The chat workload uses a v1 approximation of growing prefixes, the scheduler is greedy rather than optimal, and a single tenant is modeled with time-to-live eviction only. See `docs/paper/` for the full write-up, including related work and limitations.
+
+## Citation
+
+If you use this work, please cite the Zenodo preprint:
+
+```bibtex
+@misc{chittori2026ccrp,
+  author       = {Chittori, Prajjwal},
+  title        = {Cache-Aware Client-Side Request Planning for Black-Box LLM APIs},
+  year         = {2026},
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.21386594},
+  url          = {https://doi.org/10.5281/zenodo.21386594}
+}
+```
