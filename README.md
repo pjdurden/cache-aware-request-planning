@@ -85,6 +85,8 @@ The package is tokenizer-agnostic: it works in token counts, so the simulator an
 
 This is a draft with an honest scope. The results are simulation under representative cache parameters, not an end-to-end live-API study. The `characterize` module exists to recover real parameters from provider telemetry, which is the calibration step that would turn these numbers into measured ones. The chat workload uses a v1 approximation of growing prefixes, the scheduler is greedy rather than optimal, and a single tenant is modeled with time-to-live eviction only. See `docs/paper/` for the full write-up, including related work and limitations.
 
+The live calibration step (`docs/paper/characterize_live.py`) sends real, paid Anthropic/OpenAI requests, so by default nobody but the author can reproduce or re-check its numbers. Run it once with `--record` to save a cassette of the provider responses (via [cassette-fn](https://pypi.org/project/cassette-fn/)), commit that file, and anyone can then run it with `--replay` to reproduce the exact same recovered numbers offline, with no API key and no network call.
+
 ## Citation
 
 If you use this work, please cite the Zenodo preprint:
